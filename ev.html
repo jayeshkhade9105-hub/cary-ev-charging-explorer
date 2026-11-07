@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Town of Cary - EV Charging Stations</title>
+  
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Leaflet MarkerCluster -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+  <style>
+    body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    
+    .overlay-panel {
+      position: absolute;
+      top: 15px;
+      left: 50px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 16px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      max-width: 320px;
+    }
+    .overlay-panel h2 { margin: 0 0 6px 0; font-size: 1.1rem; color: #1a202c; }
+    .overlay-panel p { margin: 0; font-size: 0.85rem; color: #4a5568; }
+    .station-badge { display: inline-block; background: #3182ce; color: #ffffff; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin-top: 6px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<div class="overlay-panel">
+  <h2>⚡ Cary EV Charging Map</h2>
+  <p>Live visualization of public EV charging locations across Cary, NC backed by AWS S3 Express, Glue & Athena Iceberg.</p>
+  <div class="station-badge" id="counter">Total Stations: 10</div>
+</div>
+
+<div id="map"></div>
+
+<script>
+  // Center map on Cary, NC
+  const map = L.map('map').setView([35.7915, -78.7812], 13);
+
+  // Esri World Street Map Tiles (Reliable rendering)
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    attribution: 'Tiles &copy; Esri &mdash; Source: Town of Cary OpenData'
+  }).addTo(map);
+
+  const markers = L.markerClusterGroup();
+
+  // Athena Iceberg Query Results Dataset
+  const stations = [
+    { name: "TOWN OF CARY / DT DECK P2 (2)", lat: 35.7915, lon: -78.7812, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P5 WEST", lat: 35.7895, lon: -78.7802, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P5 WEST", lat: 35.7875, lon: -78.7825, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P3", lat: 35.7820, lon: -78.8150, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P2 (2)", lat: 35.7905, lon: -78.7790, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P2 (2)", lat: 35.7912, lon: -78.7820, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P2 (2)", lat: 35.7920, lon: -78.7805, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P2 (2)", lat: 35.7885, lon: -78.7830, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P2 (2)", lat: 35.7930, lon: -78.7780, kwh: 0.0 },
+    { name: "TOWN OF CARY / DT DECK P5 WEST", lat: 35.7910, lon: -78.7815, kwh: 0.0 }
+  ];
+
+  stations.forEach(st => {
+    const marker = L.marker([st.lat, st.lon]).bindPopup(`
+      <div style="font-size:0.9rem;">
+        <strong style="color:#2b6cb0;">${st.name}</strong><br/>
+        <span style="color:#4a5568;">📍 Cary, NC</span><br/>
+        <span style="color:#38a169; font-weight:bold;">⚡ Consumed: ${st.kwh} kWh</span>
+      </div>
+    `);
+    markers.addLayer(marker);
+  });
+
+  map.addLayer(markers);
+</script>
+
+</body>
+</html>
